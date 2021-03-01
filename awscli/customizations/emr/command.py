@@ -119,8 +119,7 @@ def override_args_required_option(argument_table, args, session, **kwargs):
     # file
     # We don't want to override when user is viewing the help so that we
     # can show the required options correctly in the help
-    need_to_override = False if len(args) == 1 and args[0] == 'help' \
-        else True
+    need_to_override = len(args) != 1 or args[0] != 'help'
 
     if need_to_override:
         parsed_configs = configutils.get_configs(session)

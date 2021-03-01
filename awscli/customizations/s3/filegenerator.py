@@ -44,9 +44,7 @@ def is_special_file(path):
     if stat.S_ISFIFO(mode):
         return True
     # Socket.
-    if stat.S_ISSOCK(mode):
-        return True
-    return False
+    return bool(stat.S_ISSOCK(mode))
 
 
 def is_readable(path):
@@ -168,48 +166,48 @@ class FileGenerator(object):
         outputs.  It yields the file's source path, size, and last
         update
         """
-        join, isdir, isfile = os.path.join, os.path.isdir, os.path.isfile
-        error, listdir = os.error, os.listdir
-        if not self.should_ignore_file(path):
-            if not dir_op:
-                stats = self._safely_get_file_stats(path)
-                if stats:
-                    yield stats
-            else:
-                # We need to list files in byte order based on the full
-                # expanded path of the key: 'test/1/2/3.txt'  However,
-                # listdir() will only give us contents a single directory
-                # at a time, so we'll get 'test'.  At the same time we don't
-                # want to load the entire list of files into memory.  This
-                # is handled by first going through the current directory
-                # contents and adding the directory separator to any
-                # directories.  We can then sort the contents,
-                # and ensure byte order.
-                listdir_names = listdir(path)
-                names = []
-                for name in listdir_names:
-                    if not self.should_ignore_file_with_decoding_warnings(
-                            path, name):
-                        file_path = join(path, name)
-                        if isdir(file_path):
-                            name = name + os.path.sep
-                        names.append(name)
-                self.normalize_sort(names, os.sep, '/')
-                for name in names:
+        if self.should_ignore_file(path):
+            return
+        if not dir_op:
+            stats = self._safely_get_file_stats(path)
+            if stats:
+                yield stats
+        else:
+            error, listdir = os.error, os.listdir
+            # We need to list files in byte order based on the full
+            # expanded path of the key: 'test/1/2/3.txt'  However,
+            # listdir() will only give us contents a single directory
+            # at a time, so we'll get 'test'.  At the same time we don't
+            # want to load the entire list of files into memory.  This
+            # is handled by first going through the current directory
+            # contents and adding the directory separator to any
+            # directories.  We can then sort the contents,
+            # and ensure byte order.
+            listdir_names = listdir(path)
+            names = []
+            join, isdir, isfile = os.path.join, os.path.isdir, os.path.isfile
+            for name in listdir_names:
+                if not self.should_ignore_file_with_decoding_warnings(
+                        path, name):
                     file_path = join(path, name)
                     if isdir(file_path):
+                        name = name + os.path.sep
+                    names.append(name)
+            self.normalize_sort(names, os.sep, '/')
+            for name in names:
+                file_path = join(path, name)
+                if isdir(file_path):
                         # Anything in a directory will have a prefix of
                         # this current directory and will come before the
                         # remaining contents in this directory.  This
                         # means we need to recurse into this sub directory
                         # before yielding the rest of this directory's
                         # contents.
-                        for x in self.list_files(file_path, dir_op):
-                            yield x
-                    else:
-                        stats = self._safely_get_file_stats(file_path)
-                        if stats:
-                            yield stats
+                    yield from self.list_files(file_path, dir_op)
+                else:
+                    stats = self._safely_get_file_stats(file_path)
+                    if stats:
+                        yield stats
 
     def _safely_get_file_stats(self, file_path):
         try:
@@ -272,9 +270,7 @@ class FileGenerator(object):
             if os.path.islink(path):
                 return True
         warning_triggered = self.triggers_warning(path)
-        if warning_triggered:
-            return True
-        return False
+        return bool(warning_triggered)
 
     def triggers_warning(self, path):
         """
@@ -332,9 +328,7 @@ class FileGenerator(object):
                         # exist locally.  But user should be able to
                         # delete them.
                         yield source_path, response_data
-                elif not dir_op and s3_path != source_path:
-                    pass
-                else:
+                elif dir_op or s3_path == source_path:
                     yield source_path, response_data
 
     def _list_single_object(self, s3_path):
@@ -357,7 +351,7 @@ class FileGenerator(object):
             # We want to try to give a more helpful error message.
             # This is what the customer is going to see so we want to
             # give as much detail as we have.
-            if not e.response['Error']['Code'] == '404':
+            if e.response['Error']['Code'] != '404':
                 raise
             # The key does not exist so we'll raise a more specific
             # error message here.

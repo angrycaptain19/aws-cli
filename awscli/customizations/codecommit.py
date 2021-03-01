@@ -129,10 +129,9 @@ class CodeCommitGetCommand(BasicCommand):
         return parsed
 
     def extract_url(self, parameters):
-        url = '{0}://{1}/{2}'.format(parameters['protocol'],
+        return '{0}://{1}/{2}'.format(parameters['protocol'],
                                      parameters['host'],
                                      parameters['path'])
-        return url
 
     def extract_region(self, parameters, parsed_globals):
         match = re.match(r'(vpce-.+\.)?git-codecommit(-fips)?\.([^.]+)\.(vpce\.)?amazonaws\.com',

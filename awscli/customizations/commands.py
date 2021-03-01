@@ -33,10 +33,7 @@ class _FromFile(object):
         self.filename = None
         if paths:
             self.filename = os.path.join(*paths)
-        if 'root_module' in kwargs:
-            self.root_module = kwargs['root_module']
-        else:
-            self.root_module = awscli
+        self.root_module = kwargs['root_module'] if 'root_module' in kwargs else awscli
 
 
 class BasicCommand(CLICommand):
@@ -193,10 +190,8 @@ class BasicCommand(CLICommand):
         validate_parameters(value, model)
 
     def _should_allow_plugins_override(self, param, value):
-        if (param and param.argument_model is not None and
-                value is not None):
-            return True
-        return False
+        return bool((param and param.argument_model is not None and
+                value is not None))
 
     def _run_main(self, parsed_args, parsed_globals):
         # Subclasses should implement this method.
@@ -238,9 +233,11 @@ class BasicCommand(CLICommand):
         Create the command table into a form that can be handled by the
         BasicDocHandler.
         """
-        commands = {}
-        for command in self.SUBCOMMANDS:
-            commands[command['name']] = command['command_class'](self._session)
+        commands = {
+            command['name']: command['command_class'](self._session)
+            for command in self.SUBCOMMANDS
+        }
+
         self._add_lineage(commands)
         return commands
 
@@ -335,19 +332,19 @@ class BasicHelp(HelpCommand):
 
     def _get_doc_contents(self, attr_name):
         value = getattr(self, attr_name)
-        if isinstance(value, BasicCommand.FROM_FILE):
-            if value.filename is not None:
-                trailing_path = value.filename
-            else:
-                trailing_path = os.path.join(self.name, attr_name + '.rst')
-            root_module = value.root_module
-            doc_path = os.path.join(
-                os.path.abspath(os.path.dirname(root_module.__file__)),
-                'examples', trailing_path)
-            with _open(doc_path) as f:
-                return f.read()
-        else:
+        if not isinstance(value, BasicCommand.FROM_FILE):
             return value
+
+        if value.filename is None:
+            trailing_path = os.path.join(self.name, attr_name + '.rst')
+        else:
+            trailing_path = value.filename
+        root_module = value.root_module
+        doc_path = os.path.join(
+            os.path.abspath(os.path.dirname(root_module.__file__)),
+            'examples', trailing_path)
+        with _open(doc_path) as f:
+            return f.read()
 
     def __call__(self, args, parsed_globals):
         # Create an event handler for a Provider Document

@@ -48,8 +48,7 @@ def display_response(session, operation_name, result, parsed_globals):
 # Get policy arn from region and policy name
 def get_policy_arn(region, policy_name):
     region_suffix = get_policy_arn_suffix(region)
-    role_arn = POLICY_ARN_PATTERN.format(region_suffix, policy_name)
-    return role_arn
+    return POLICY_ARN_PATTERN.format(region_suffix, policy_name)
 
 
 # Method to parse the arguments to get the region value

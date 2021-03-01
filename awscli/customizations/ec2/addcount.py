@@ -84,10 +84,7 @@ class CountArgument(BaseCLIArgument):
             # NO-OP if value is not explicitly set by user
             return
         try:
-            if ':' in value:
-                minstr, maxstr = value.split(':')
-            else:
-                minstr, maxstr = (value, value)
+            minstr, maxstr = value.split(':') if ':' in value else (value, value)
             parameters['MinCount'] = int(minstr)
             parameters['MaxCount'] = int(maxstr)
         except:

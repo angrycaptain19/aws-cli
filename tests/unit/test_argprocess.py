@@ -393,9 +393,9 @@ class TestParamShorthand(BaseArgProcessTest):
     def test_error_messages_for_structure_scalar(self):
         p = self.get_param_model(
             'elasticbeanstalk.CreateConfigurationTemplate.SourceConfiguration')
-        value = 'ApplicationName:foo,TemplateName=bar'
         error_msg = "Error parsing parameter '--source-configuration'.*Expected"
         with self.assertRaisesRegexp(ParamError, error_msg):
+            value = 'ApplicationName:foo,TemplateName=bar'
             self.parse_shorthand(p, value)
 
     def test_improper_separator(self):
@@ -403,9 +403,9 @@ class TestParamShorthand(BaseArgProcessTest):
         # error message.
         p = self.get_param_model(
             'elasticbeanstalk.CreateConfigurationTemplate.SourceConfiguration')
-        value = 'ApplicationName:foo,TemplateName:bar'
         error_msg = "Error parsing parameter '--source-configuration'.*Expected"
         with self.assertRaisesRegexp(ParamError, error_msg):
+            value = 'ApplicationName:foo,TemplateName:bar'
             self.parse_shorthand(p, value)
 
     def test_improper_separator_for_filters_param(self):
@@ -871,8 +871,8 @@ class TestJSONValueHeaderParams(BaseArgProcessTest):
         self.assertEqual(unpack_cli_arg(self.p, value), None)
 
     def test_json_value_decode_error(self):
-        value = 'invalid string to be serialized'
         with self.assertRaises(ParamError):
+            value = 'invalid string to be serialized'
             unpack_cli_arg(self.p, value)
 
 

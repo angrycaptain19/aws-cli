@@ -125,13 +125,13 @@ def validate_s3_location(params, arg_name):
         s3_location = getattr(params, arg_name)
         if s3_location:
             matcher = re.match('s3://(.+?)/(.+)', str(s3_location))
-            if matcher:
-                params.bucket = matcher.group(1)
-                params.key = matcher.group(2)
-            else:
+            if not matcher:
                 raise ValueError(
                     '--{0} must specify the Amazon S3 URL format as '
                     's3://<bucket>/<key>.'.format(
                         arg_name.replace('_', '-')
                     )
                 )
+
+            params.bucket = matcher.group(1)
+            params.key = matcher.group(2)

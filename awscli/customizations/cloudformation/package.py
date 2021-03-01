@@ -166,11 +166,9 @@ class PackageCommand(BasicCommand):
         exported_template = template.export()
 
         if use_json:
-            exported_str = json.dumps(exported_template, indent=4, ensure_ascii=False)
+            return json.dumps(exported_template, indent=4, ensure_ascii=False)
         else:
-            exported_str = yaml_dump(exported_template)
-
-        return exported_str
+            return yaml_dump(exported_template)
 
     def write_output(self, output_file_name, data):
         if output_file_name is None:

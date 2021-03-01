@@ -111,33 +111,42 @@ class TestCodeArtifactLogin(unittest.TestCase):
             endpoint=self.endpoint
         )
 
-        commands = []
-        commands.append(
+        return [
             [
-                'nuget', 'sources', 'add',
-                '-name', self.nuget_source_name,
-                '-source', nuget_index_url,
-                '-username', 'aws',
-                '-password', self.auth_token
+                'nuget',
+                'sources',
+                'add',
+                '-name',
+                self.nuget_source_name,
+                '-source',
+                nuget_index_url,
+                '-username',
+                'aws',
+                '-password',
+                self.auth_token,
             ]
-        )
-        return commands
+        ]
 
     def _get_dotnet_commands(self):
         nuget_index_url = self.nuget_index_url_fmt.format(
             endpoint=self.endpoint
         )
 
-        commands = []
-        commands.append(
+        return [
             [
-                'dotnet', 'nuget', 'add', 'source', nuget_index_url,
-                '--name', self.nuget_source_name,
-                '--username', 'aws',
-                '--password', self.auth_token
+                'dotnet',
+                'nuget',
+                'add',
+                'source',
+                nuget_index_url,
+                '--name',
+                self.nuget_source_name,
+                '--username',
+                'aws',
+                '--password',
+                self.auth_token,
             ]
-        )
-        return commands
+        ]
 
     def _get_npm_commands(self, **kwargs):
         npm_cmd = 'npm.cmd' \
@@ -154,18 +163,11 @@ class TestCodeArtifactLogin(unittest.TestCase):
         scope = kwargs.get('scope')
         registry = '{}:registry'.format(scope) if scope else 'registry'
 
-        commands = []
-        commands.append(
-            [npm_cmd, 'config', 'set', registry, self.endpoint]
-        )
-        commands.append(
-            [npm_cmd, 'config', 'set', always_auth_config, 'true']
-        )
-        commands.append(
-            [npm_cmd, 'config', 'set', auth_token_config, self.auth_token]
-        )
-
-        return commands
+        return [
+            [npm_cmd, 'config', 'set', registry, self.endpoint],
+            [npm_cmd, 'config', 'set', always_auth_config, 'true'],
+            [npm_cmd, 'config', 'set', auth_token_config, self.auth_token],
+        ]
 
     def _get_pip_commands(self):
         pip_index_url_fmt = '{scheme}://aws:{auth_token}@{netloc}{path}simple/'

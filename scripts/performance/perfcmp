@@ -28,8 +28,7 @@ class RunComparison(object):
         self.new_summary = new_summary
 
     def iter_field_names(self):
-        for field in self.TIME_FIELDS + self.MEMORY_FIELDS + self.OTHER_FIELDS:
-            yield field
+        yield from self.TIME_FIELDS + self.MEMORY_FIELDS + self.OTHER_FIELDS
 
     def old(self, field):
         value = self.old_summary[field]
@@ -90,10 +89,9 @@ class RunComparison(object):
                 return ['%.2f' % (base * bytes_int / unit), suffix]
 
     def diff_percent(self, field):
-        diff_percent = (
+        return (
             (self.new_summary[field] - self.old_summary[field]) /
             float(self.old_summary[field])) * 100
-        return diff_percent
 
 
 def compare_runs(old_dir, new_dir):

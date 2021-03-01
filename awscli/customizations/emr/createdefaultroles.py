@@ -68,9 +68,11 @@ def get_service_principal(service, endpoint_host, session=None):
     if session is None:
         session = botocore.session.Session()
 
-    if service == EMR_AUTOSCALING_SERVICE_NAME:
-        if region not in session.get_available_regions('emr', 'aws-cn'):
-            return EMR_AUTOSCALING_SERVICE_PRINCIPAL
+    if (
+        service == EMR_AUTOSCALING_SERVICE_NAME
+        and region not in session.get_available_regions('emr', 'aws-cn')
+    ):
+        return EMR_AUTOSCALING_SERVICE_PRINCIPAL
 
     return service + '.' + suffix
 
@@ -78,12 +80,11 @@ def get_service_principal(service, endpoint_host, session=None):
 def _get_suffix_and_region_from_endpoint_host(endpoint_host):
     suffix_match = _get_regex_match_from_endpoint_host(endpoint_host)
 
-    if suffix_match is not None and suffix_match.lastindex >= 3:
-        suffix = suffix_match.group(3)
-        region = suffix_match.group(2)
-    else:
+    if suffix_match is None or suffix_match.lastindex < 3:
         raise ResolveServicePrincipalError
 
+    suffix = suffix_match.group(3)
+    region = suffix_match.group(2)
     return suffix, region
 
 
@@ -255,8 +256,7 @@ class CreateDefaultRoles(Command):
         return True
 
     def _get_role_policy(self, arn, parsed_globals):
-        parameters = {}
-        parameters['PolicyArn'] = arn
+        parameters = {'PolicyArn': arn}
         policy_details = self._call_iam_operation('GetPolicy', parameters,
                                                   parsed_globals)
         parameters["VersionId"] = policy_details["Policy"]["DefaultVersionId"]
@@ -272,10 +272,12 @@ class CreateDefaultRoles(Command):
             service_principal = get_service_principal(
                 service_names[0], self.emr_endpoint_url, self._session)
         else:
-            service_principal = []
-            for service in service_names:
-                service_principal.append(get_service_principal(
-                    service, self.emr_endpoint_url, self._session))
+            service_principal = [
+                get_service_principal(
+                    service, self.emr_endpoint_url, self._session
+                )
+                for service in service_names
+            ]
 
         LOG.debug(service_principal)
 

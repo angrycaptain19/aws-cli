@@ -76,8 +76,7 @@ def create_clidriver():
     _set_user_agent_for_session(session)
     load_plugins(session.full_config.get('plugins', {}),
                  event_hooks=session.get_component('event_emitter'))
-    driver = CLIDriver(session=session)
-    return driver
+    return CLIDriver(session=session)
 
 
 def _set_user_agent_for_session(session):
@@ -183,12 +182,11 @@ class CLIDriver(object):
         # Also add a 'help' command.
         command_table['help'] = self.create_help_command()
         cli_data = self._get_cli_data()
-        parser = MainArgParser(
+        return MainArgParser(
             command_table, self.session.user_agent(),
             cli_data.get('description', None),
             self._get_argument_table(),
             prog="aws")
-        return parser
 
     def main(self, args=None):
         """
@@ -607,8 +605,7 @@ class ServiceOperation(object):
             name, **kwargs)
 
     def _create_operation_parser(self, arg_table):
-        parser = ArgTableArgParser(arg_table)
-        return parser
+        return ArgTableArgParser(arg_table)
 
 
 class CLIOperationCaller(object):
@@ -654,13 +651,14 @@ class CLIOperationCaller(object):
     def _make_client_call(self, client, operation_name, parameters,
                           parsed_globals):
         py_operation_name = xform_name(operation_name)
-        if client.can_paginate(py_operation_name) and parsed_globals.paginate:
-            paginator = client.get_paginator(py_operation_name)
-            response = paginator.paginate(**parameters)
-        else:
-            response = getattr(client, xform_name(operation_name))(
+        if (
+            not client.can_paginate(py_operation_name)
+            or not parsed_globals.paginate
+        ):
+            return getattr(client, xform_name(operation_name))(
                 **parameters)
-        return response
+        paginator = client.get_paginator(py_operation_name)
+        return paginator.paginate(**parameters)
 
     def _display_response(self, command_name, response,
                           parsed_globals):

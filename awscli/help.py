@@ -111,8 +111,7 @@ class PosixHelpRenderer(PagingHelpRenderer):
         cmdline = ['groff', '-m', 'man', '-T', 'ascii']
         LOG.debug("Running command: %s", cmdline)
         p3 = self._popen(cmdline, stdin=PIPE, stdout=PIPE, stderr=PIPE)
-        groff_output = p3.communicate(input=man_contents)[0]
-        return groff_output
+        return p3.communicate(input=man_contents)[0]
 
     def _send_output_to_pager(self, output):
         cmdline = self.get_pager_cmdline()
@@ -141,8 +140,10 @@ class PosixHelpRenderer(PagingHelpRenderer):
     def _exists_on_path(self, name):
         # Since we're only dealing with POSIX systems, we can
         # ignore things like PATHEXT.
-        return any([os.path.exists(os.path.join(p, name))
-                    for p in os.environ.get('PATH', '').split(os.pathsep)])
+        return any(
+            os.path.exists(os.path.join(p, name))
+            for p in os.environ.get('PATH', '').split(os.pathsep)
+        )
 
 
 class WindowsHelpRenderer(PagingHelpRenderer):
@@ -151,9 +152,8 @@ class WindowsHelpRenderer(PagingHelpRenderer):
     PAGER = 'more'
 
     def _convert_doc_content(self, contents):
-        text_output = publish_string(contents,
+        return publish_string(contents,
                                      writer=TextWriter())
-        return text_output
 
     def _popen(self, *args, **kwargs):
         # Also set the shell value to True.  To get any of the

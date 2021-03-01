@@ -447,7 +447,7 @@ class TestCp(BaseS3IntegrationTest):
         bucket_name = _SHARED_BUCKET
         foo_txt = self.files.create_file('foo.txt', '')
         with open(foo_txt, 'wb') as f:
-            for i in range(20):
+            for _ in range(20):
                 f.write(b'a' * 1024 * 1024)
         # --quiet is added to make sure too much output is not communicated
         # to the PIPE, causing a deadlock when not consumed.
@@ -536,7 +536,7 @@ class TestCp(BaseS3IntegrationTest):
         num_mb = 200
         foo_txt = self.files.create_file('foo.txt', '')
         with open(foo_txt, 'wb') as f:
-            for i in range(num_mb):
+            for _ in range(num_mb):
                 f.write(b'a' * 1024 * 1024)
 
         p = aws('s3 cp %s s3://%s/ --region eu-central-1' % (
@@ -1458,7 +1458,7 @@ class TestMemoryUtilization(BaseS3IntegrationTest):
         num_mb = 200
         foo_txt = self.files.create_file('foo.txt', '')
         with open(foo_txt, 'wb') as f:
-            for i in range(num_mb):
+            for _ in range(num_mb):
                 f.write(b'a' * 1024 * 1024)
 
         # The current memory threshold is set at about the peak amount for

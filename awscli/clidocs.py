@@ -124,9 +124,8 @@ class CLIDocumentEventHandler(object):
             if argument.group_name in self._documented_arg_groups:
                 # This arg is already documented so we can move on.
                 return
-            option_str = ' | '.join(
-                [a.cli_name for a in
-                 self._arg_groups[argument.group_name]])
+            option_str = ' | '.join(a.cli_name for a in
+                         self._arg_groups[argument.group_name])
             self._documented_arg_groups.append(argument.group_name)
         elif argument.cli_name.startswith('--'):
             option_str = '%s <value>' % argument.cli_name
@@ -158,9 +157,8 @@ class CLIDocumentEventHandler(object):
             if argument.group_name in self._documented_arg_groups:
                 # This arg is already documented so we can move on.
                 return
-            name = ' | '.join(
-                ['``%s``' % a.cli_name for a in
-                 self._arg_groups[argument.group_name]])
+            name = ' | '.join('``%s``' % a.cli_name for a in
+                         self._arg_groups[argument.group_name])
             self._documented_arg_groups.append(argument.group_name)
         else:
             name = '``%s``' % argument.cli_name
@@ -190,14 +188,13 @@ class CLIDocumentEventHandler(object):
 
     def _document_enums(self, model, doc):
         """Documents top-level parameter enums"""
-        if isinstance(model, StringShape):
-            if model.enum:
-                doc.style.new_paragraph()
-                doc.write('Possible values:')
-                doc.style.start_ul()
-                for enum in model.enum:
-                    doc.style.li('``%s``' % enum)
-                doc.style.end_ul()
+        if isinstance(model, StringShape) and model.enum:
+            doc.style.new_paragraph()
+            doc.write('Possible values:')
+            doc.style.start_ul()
+            for enum in model.enum:
+                doc.style.li('``%s``' % enum)
+            doc.style.end_ul()
 
     def _document_nested_structure(self, model, doc):
         """Recursively documents parameters in nested structures"""
@@ -399,7 +396,7 @@ class OperationDocumentEventHandler(CLIDocumentEventHandler):
         if isinstance(argument_model, StringShape):
             if argument_model.enum and include_enum_values:
                 choices = argument_model.enum
-                return '|'.join(['"%s"' % c for c in choices])
+                return '|'.join('"%s"' % c for c in choices)
             else:
                 return '"string"'
         elif argument_model.type_name == 'boolean':
@@ -464,13 +461,7 @@ class OperationDocumentEventHandler(CLIDocumentEventHandler):
             if member_type_name in SCALAR_TYPES:
                 doc.write('"%s": %s' % (member_name,
                     self._json_example_value_name(member_model)))
-            elif member_type_name == 'structure':
-                doc.write('"%s": ' % member_name)
-                self._json_example(doc, member_model, stack)
-            elif member_type_name == 'map':
-                doc.write('"%s": ' % member_name)
-                self._json_example(doc, member_model, stack)
-            elif member_type_name == 'list':
+            elif member_type_name in ['structure', 'map', 'list']:
                 doc.write('"%s": ' % member_name)
                 self._json_example(doc, member_model, stack)
             if i < len(members) - 1:
@@ -485,11 +476,13 @@ class OperationDocumentEventHandler(CLIDocumentEventHandler):
             find_service_and_method_in_event_name(event_name)
         doc = help_command.doc
         cli_argument = help_command.arg_table[arg_name]
-        if cli_argument.group_name in self._arg_groups:
-            if cli_argument.group_name in self._documented_arg_groups:
-                # Args with group_names (boolean args) don't
-                # need to generate example syntax.
-                return
+        if (
+            cli_argument.group_name in self._arg_groups
+            and cli_argument.group_name in self._documented_arg_groups
+        ):
+            # Args with group_names (boolean args) don't
+            # need to generate example syntax.
+            return
         argument_model = cli_argument.argument_model
         docgen = ParamShorthandDocGen()
         if docgen.supports_shorthand(cli_argument.argument_model):
@@ -684,10 +677,10 @@ class TopicDocumentEventHandler(TopicListerDocumentEventHandler):
         return ''.join(lines[content_begin_index:])
 
     def _line_has_tag(self, line):
-        for tag in self._topic_tag_db.valid_tags:
-            if line.startswith(':' + tag + ':'):
-                return True
-        return False
+        return any(
+            line.startswith(':' + tag + ':')
+            for tag in self._topic_tag_db.valid_tags
+        )
 
     def doc_subitems_start(self, help_command, **kwargs):
         pass

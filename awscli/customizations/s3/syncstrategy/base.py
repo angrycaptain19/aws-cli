@@ -171,10 +171,9 @@ class BaseSync(object):
         elif self.arg_name is not None:
             # ``name`` has all ``-`` replaced with ``_`` in ``params``.
             name_in_params = self.arg_name.replace('-', '_')
-        if name_in_params is not None:
-            if params.get(name_in_params):
-                # Return the sync strategy object to be used for syncing.
-                return self
+        if name_in_params is not None and params.get(name_in_params):
+            # Return the sync strategy object to be used for syncing.
+            return self
         return None
 
     def total_seconds(self, td):

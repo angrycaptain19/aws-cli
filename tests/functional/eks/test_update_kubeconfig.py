@@ -46,9 +46,8 @@ def sanitize_output(output):
     for line in output.splitlines():
         if bool(re.match('warning', line.strip(), re.I)):
             return to_return.strip()
-        else:
-            to_return += line
-            to_return += '\n'
+        to_return += line
+        to_return += '\n'
     return to_return.strip()
 
 def build_environment(entries):
@@ -251,10 +250,10 @@ class TestUpdateKubeconfig(unittest.TestCase):
         self.assert_output(captured_output, 'output_single')
 
     def test_dry_run_corrupted(self):
-        passed = "invalid_string_clusters"
-        environment = []
-
         with self.assertRaises(KubeconfigCorruptedError):
+            passed = "invalid_string_clusters"
+            environment = []
+
             captured_output = self.assert_cmd_dry(passed, environment)
 
     def test_write_new(self):
@@ -288,15 +287,15 @@ class TestUpdateKubeconfig(unittest.TestCase):
         self.assert_config_state("valid_existing", "output_combined")
 
     def test_all_corrupted(self):
-        configs = ["invalid_string_cluster_entry",
-                   "invalid_string_contexts",
-                   "invalid_text"]
-        passed = None
-        environment = ["invalid_string_cluster_entry",
+        with self.assertRaises(KubeconfigCorruptedError):
+            configs = ["invalid_string_cluster_entry",
                        "invalid_string_contexts",
                        "invalid_text"]
+            passed = None
+            environment = ["invalid_string_cluster_entry",
+                           "invalid_string_contexts",
+                           "invalid_text"]
 
-        with self.assertRaises(KubeconfigCorruptedError):
             self.assert_cmd(configs, passed, environment)
 
     def test_all_but_one_corrupted(self):
@@ -314,23 +313,23 @@ class TestUpdateKubeconfig(unittest.TestCase):
         self.assert_config_state("valid_existing", 'output_combined')
 
     def test_corrupted_and_missing(self):
-        configs = ["invalid_string_clusters",
-                   "invalid_string_users"]
-        passed = None
-        environment = ["invalid_string_clusters",
-                       "does_not_exist",
-                       "does_not_exist2",
-                       "invalid_string_users"]
-
         with self.assertRaises(KubeconfigCorruptedError):
+            configs = ["invalid_string_clusters",
+                       "invalid_string_users"]
+            passed = None
+            environment = ["invalid_string_clusters",
+                           "does_not_exist",
+                           "does_not_exist2",
+                           "invalid_string_users"]
+
             self.assert_cmd(configs, passed, environment)
 
     def test_one_corrupted_environment(self):
-        configs = ["invalid_string_clusters"]
-        passed = None
-        environment = ["invalid_string_clusters"]
-
         with self.assertRaises(KubeconfigCorruptedError):
+            configs = ["invalid_string_clusters"]
+            passed = None
+            environment = ["invalid_string_clusters"]
+
             self.assert_cmd(configs, passed, environment)
 
     def test_environmemt_empty_elements(self):
@@ -341,12 +340,12 @@ class TestUpdateKubeconfig(unittest.TestCase):
             "",
             self._get_temp_config("valid_existing")
         ])
-        args = ["--name", "ExampleCluster"]
-
         with mock.patch.dict(os.environ, {'KUBECONFIG': env_variable}):
             with mock.patch(
-                "awscli.customizations.eks.update_kubeconfig.DEFAULT_PATH",
-                            self._get_temp_config("default_temp")):
+                        "awscli.customizations.eks.update_kubeconfig.DEFAULT_PATH",
+                                    self._get_temp_config("default_temp")):
+                args = ["--name", "ExampleCluster"]
+
                 self.command(args, None)
 
         self.mock_create_client.assert_called_once_with('eks')
@@ -359,12 +358,12 @@ class TestUpdateKubeconfig(unittest.TestCase):
 
         self.initialize_tempfiles(configs)
         env_variable = build_environment(["", ""," ", "\t",""])
-        args = ["--name", "ExampleCluster"]
-
         with mock.patch.dict(os.environ, {'KUBECONFIG': env_variable}):
             with mock.patch(
-                "awscli.customizations.eks.update_kubeconfig.DEFAULT_PATH",
-                            self._get_temp_config("default_temp")):
+                        "awscli.customizations.eks.update_kubeconfig.DEFAULT_PATH",
+                                    self._get_temp_config("default_temp")):
+                args = ["--name", "ExampleCluster"]
+
                 self.command(args, None)
 
         self.mock_create_client.assert_called_once_with('eks')
@@ -373,13 +372,13 @@ class TestUpdateKubeconfig(unittest.TestCase):
         self.assert_config_state("default_temp", "output_single")
 
     def test_default_path_directory(self):
-        configs = []
-        passed = None
-        environment = []
-        # Default will be the temp directory once _get_temp_config is called
-        default = ""
-
         with self.assertRaises(KubeconfigInaccessableError):
+            configs = []
+            passed = None
+            environment = []
+            # Default will be the temp directory once _get_temp_config is called
+            default = ""
+
             self.assert_cmd(configs, passed, environment, default)
 
     def test_update_existing(self):
@@ -401,12 +400,12 @@ class TestUpdateKubeconfig(unittest.TestCase):
         self.assert_config_state("valid_old_data", "output_combined")
 
     def test_cluster_creating(self):
-        configs = ["output_combined"]
-        passed = "output_combined"
-        environment = []
         self.client.describe_cluster =\
             Mock(return_value=describe_cluster_creating_response())
         with self.assertRaises(EKSClusterError):
+            configs = ["output_combined"]
+            passed = "output_combined"
+            environment = []
             self.assert_cmd(configs, passed, environment)
 
     def test_kubeconfig_order(self):

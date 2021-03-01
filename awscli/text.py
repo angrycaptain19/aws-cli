@@ -66,7 +66,7 @@ def _format_scalar_list(elements, identifier, stream):
                                        item))
     else:
         # For a bare list, just print the contents.
-        stream.write('\t'.join([six.text_type(item) for item in elements]))
+        stream.write('\t'.join(six.text_type(item) for item in elements))
         stream.write('\n')
 
 

@@ -123,11 +123,7 @@ def _run_cmd(cmd, expected_rc=0):
     # worth seeing if we can make drivers reusable to speed these up generated
     # tests.
     driver = create_clidriver()
-    if not isinstance(cmd, list):
-        cmdlist = cmd.split()
-    else:
-        cmdlist = cmd
-
+    cmdlist = cmd.split() if not isinstance(cmd, list) else cmd
     with capture_output() as captured:
         try:
             rc = driver.main(cmdlist)

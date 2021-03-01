@@ -140,8 +140,7 @@ def _get_venv_package_tarball(package_dir):
 
 
 def create_working_dir():
-    d = tempfile.mkdtemp()
-    return d
+    return tempfile.mkdtemp()
 
 
 def pip_install_packages(install_dir):
