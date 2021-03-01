@@ -246,10 +246,12 @@ class ResultRecorder(BaseResultHandler):
                 'Any result using _get_ongoing_dict_key must subclass from '
                 'BaseResult. Provided result is of type: %s' % type(result)
             )
-        key_parts = []
-        for result_property in [result.transfer_type, result.src, result.dest]:
-            if result_property is not None:
-                key_parts.append(ensure_text_type(result_property))
+        key_parts = [
+            ensure_text_type(result_property)
+            for result_property in [result.transfer_type, result.src, result.dest]
+            if result_property is not None
+        ]
+
         return u':'.join(key_parts)
 
     def _pop_result_from_ongoing_dicts(self, result):

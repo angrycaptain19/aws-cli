@@ -19,16 +19,13 @@ class TestDataPipelineQueryObjects(BaseAWSCommandParamsTest):
     prefix = 'datapipeline list-runs '
 
     def _generate_pipeline_objects(self, object_ids):
-        objects = []
-        for object_id in object_ids:
-            objects.append({
+        return [{
                 'id': object_id,
                 'name': object_id,
                 'fields': [
                     {'key': '@componentParent', 'stringValue': object_id}
                 ]
-            })
-        return objects
+            } for object_id in object_ids]
 
     def test_list_more_than_one_hundred_runs(self):
         start_date = '2017-10-22T00:37:21'

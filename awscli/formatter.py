@@ -39,12 +39,11 @@ class Formatter(object):
         # the request id) if there is an error in the response.
         # Since all errors have been unified under the Errors key,
         # this should be a reasonable way to filter.
-        if 'Errors' not in response_data:
-            if 'ResponseMetadata' in response_data:
-                if 'RequestId' in response_data['ResponseMetadata']:
-                    request_id = response_data['ResponseMetadata']['RequestId']
-                    LOG.debug('RequestId: %s', request_id)
-                del response_data['ResponseMetadata']
+        if 'Errors' not in response_data and 'ResponseMetadata' in response_data:
+            if 'RequestId' in response_data['ResponseMetadata']:
+                request_id = response_data['ResponseMetadata']['RequestId']
+                LOG.debug('RequestId: %s', request_id)
+            del response_data['ResponseMetadata']
 
     def _get_default_stream(self):
         return compat.get_stdout_text_writer()
@@ -232,11 +231,7 @@ class TextFormatter(Formatter):
             if is_response_paginated(response):
                 result_keys = response.result_keys
                 for i, page in enumerate(response):
-                    if i > 0:
-                        current = {}
-                    else:
-                        current = response.non_aggregate_part
-
+                    current = {} if i > 0 else response.non_aggregate_part
                     for result_key in result_keys:
                         data = result_key.search(page)
                         set_value_from_jmespath(

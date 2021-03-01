@@ -134,9 +134,7 @@ class CreateCluster(Command):
     EXAMPLES = BasicCommand.FROM_FILE('emr', 'create-cluster-examples.rst')
 
     def _run_main_command(self, parsed_args, parsed_globals):
-        params = {}
-        params['Name'] = parsed_args.name
-
+        params = {'Name': parsed_args.name}
         self._validate_release_label_ami_version(parsed_args)
 
         service_role_validation_message = (
@@ -211,9 +209,11 @@ class CreateCluster(Command):
 
         if parsed_args.instance_groups is not None:
             for instance_group in instances_config['InstanceGroups']:
-                if 'AutoScalingPolicy' in instance_group.keys():
-                    if parsed_args.auto_scaling_role is None:
-                        raise exceptions.MissingAutoScalingRoleError()
+                if (
+                    'AutoScalingPolicy' in instance_group.keys()
+                    and parsed_args.auto_scaling_role is None
+                ):
+                    raise exceptions.MissingAutoScalingRoleError()
 
         emrutils.apply_dict(params, 'AutoScalingRole', parsed_args.auto_scaling_role)
 

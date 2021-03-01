@@ -209,8 +209,7 @@ class QueryArgBuilder(object):
             self._build_schedule_times(selectors, parsed_args)
         if parsed_args.status is not None:
             self._build_status(selectors, parsed_args)
-        query = {'selectors': selectors}
-        return query
+        return {'selectors': selectors}
 
     def _build_schedule_times(self, selectors, parsed_args):
         if parsed_args.start_interval is not None:

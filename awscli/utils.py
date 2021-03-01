@@ -27,7 +27,7 @@ def split_on_commas(value):
     if not any(char in value for char in ['"', '\\', "'", ']', '[']):
         # No quotes or escaping, just use a simple split.
         return value.split(',')
-    elif not any(char in value for char in ['"', "'", '[', ']']):
+    elif all(char not in value for char in ['"', "'", '[', ']']):
         # Simple escaping, let the csv module handle it.
         return list(csv.reader(six.StringIO(value), escapechar='\\'))[0]
     else:
@@ -103,13 +103,14 @@ def _find_quote_char_in_part(part):
     quote_char = None
     double_quote = part.find('"')
     single_quote = part.find("'")
-    if double_quote >= 0 and single_quote == -1:
+    if (
+        double_quote >= 0
+        and single_quote == -1
+        or (single_quote < 0 or double_quote != -1)
+        and double_quote < single_quote
+    ):
         quote_char = '"'
-    elif single_quote >= 0 and double_quote == -1:
-        quote_char = "'"
-    elif double_quote < single_quote:
-        quote_char = '"'
-    elif single_quote < double_quote:
+    elif single_quote >= 0 and double_quote == -1 or single_quote < double_quote:
         quote_char = "'"
     return quote_char
 

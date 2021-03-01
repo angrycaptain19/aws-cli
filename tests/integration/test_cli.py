@@ -337,10 +337,7 @@ class TestCommandLineage(unittest.TestCase):
             help_command = command.create_help_command()
             command_table = help_command.command_table
 
-        actual_lineage_names = []
-        for cmd in command.lineage:
-            actual_lineage_names.append(cmd.name)
-
+        actual_lineage_names = [cmd.name for cmd in command.lineage]
         # Assert the actual names of each command in a lineage is as expected.
         self.assertEqual(actual_lineage_names, ref_lineage_names)
 

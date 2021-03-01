@@ -60,7 +60,7 @@ class FlattenedArgument(CustomArgument):
         if value is not None:
             # Convert type if possible
             if self.type == 'boolean':
-                value = not value.lower() == 'false'
+                value = value.lower() != 'false'
             elif self.type in ['integer', 'long']:
                 value = int(value)
             elif self.type in ['float', 'double']:
@@ -70,11 +70,7 @@ class FlattenedArgument(CustomArgument):
                 self._hydrate(parameters, container, cli_type, key, value)
             else:
                 if container not in parameters:
-                    if cli_type == 'list':
-                        parameters[container] = [{}]
-                    else:
-                        parameters[container] = {}
-
+                    parameters[container] = [{}] if cli_type == 'list' else {}
                 if self._hydrate_value:
                     value = self._hydrate_value(value)
 
@@ -172,10 +168,14 @@ class FlattenArguments(object):
             argument_from_table = argument_table[name]
             overwritten = False
 
-            LOG.debug('Flattening {0} argument {1} into {2}'.format(
-                command.name, name,
-                ', '.join([v['name'] for k, v in argument['flatten'].items()])
-            ))
+            LOG.debug(
+                'Flattening {0} argument {1} into {2}'.format(
+                    command.name,
+                    name,
+                    ', '.join(v['name'] for k, v in argument['flatten'].items()),
+                )
+            )
+
 
             # For each parameter to flatten out
             for sub_argument, new_config in argument['flatten'].items():

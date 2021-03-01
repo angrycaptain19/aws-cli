@@ -438,22 +438,21 @@ class CLIArgument(BaseCLIArgument):
     def add_to_params(self, parameters, value):
         if value is None:
             return
-        else:
-            # This is a two step process.  First is the process of converting
-            # the command line value into a python value.  Normally this is
-            # handled by argparse directly, but there are cases where extra
-            # processing is needed.  For example, "--foo name=value" the value
-            # can be converted from "name=value" to {"name": "value"}.  This is
-            # referred to as the "unpacking" process.  Once we've unpacked the
-            # argument value, we have to decide how this is converted into
-            # something that can be consumed by botocore.  Many times this is
-            # just associating the key and value in the params dict as down
-            # below.  Sometimes this can be more complicated, and subclasses
-            # can customize as they need.
-            unpacked = self._unpack_argument(value)
-            LOG.debug('Unpacked value of %r for parameter "%s": %r', value,
-                      self.py_name, unpacked)
-            parameters[self._serialized_name] = unpacked
+        # This is a two step process.  First is the process of converting
+        # the command line value into a python value.  Normally this is
+        # handled by argparse directly, but there are cases where extra
+        # processing is needed.  For example, "--foo name=value" the value
+        # can be converted from "name=value" to {"name": "value"}.  This is
+        # referred to as the "unpacking" process.  Once we've unpacked the
+        # argument value, we have to decide how this is converted into
+        # something that can be consumed by botocore.  Many times this is
+        # just associating the key and value in the params dict as down
+        # below.  Sometimes this can be more complicated, and subclasses
+        # can customize as they need.
+        unpacked = self._unpack_argument(value)
+        LOG.debug('Unpacked value of %r for parameter "%s": %r', value,
+                  self.py_name, unpacked)
+        parameters[self._serialized_name] = unpacked
 
     def _unpack_argument(self, value):
         service_name = self._operation_model.service_model.service_name
@@ -517,14 +516,8 @@ class BooleanArgument(CLIArgument):
                                               serialized_name=serialized_name)
         self._mutex_group = None
         self._action = action
-        if dest is None:
-            self._destination = self.py_name
-        else:
-            self._destination = dest
-        if group_name is None:
-            self._group_name = self.name
-        else:
-            self._group_name = group_name
+        self._destination = self.py_name if dest is None else dest
+        self._group_name = self.name if group_name is None else group_name
         self._default = default
 
     def add_to_params(self, parameters, value):

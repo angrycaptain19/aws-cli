@@ -74,8 +74,7 @@ def center_text(text, length=80, left_edge='|', right_edge='|',
     right_side_spaces = length - get_text_length(right_edge) - length_so_far
     output.append(' ' * right_side_spaces)
     output.append(right_edge)
-    final = ''.join(output)
-    return final
+    return ''.join(output)
 
 
 def align_left(text, length, left_edge='|', right_edge='|', text_length=None,
@@ -87,10 +86,7 @@ def align_left(text, length, left_edge='|', right_edge='|', text_length=None,
     computed_length = (
         text_length + left_padding + \
         get_text_length(left_edge) + get_text_length(right_edge))
-    if length - computed_length >= 0:
-        padding = left_padding
-    else:
-        padding = 0
+    padding = left_padding if length - computed_length >= 0 else 0
     output = []
     length_so_far = 0
     output.append(left_edge)
@@ -196,10 +192,7 @@ class MultiTable(object):
             self._sections = []
         if styler is None:
             # Move out to factory.
-            if is_a_tty():
-                self._styler = ColorizedStyler()
-            else:
-                self._styler = Styler()
+            self._styler = ColorizedStyler() if is_a_tty() else Styler()
         else:
             self._styler = styler
         self._rendering_index = 0
@@ -239,10 +232,9 @@ class MultiTable(object):
             return self._auto_reformat
 
     def _calculate_max_width(self):
-        max_width = max(s.total_width(padding=4, with_border=True,
+        return max(s.total_width(padding=4, with_border=True,
                                       outer_padding=s.indent_level)
                         for s in self._sections)
-        return max_width
 
     def _render_section(self, section, max_width, stream):
         stream = IndentedStream(stream, section.indent_level,
@@ -355,34 +347,31 @@ class Section(object):
             return unscaled_widths
         if not unscaled_widths:
             return unscaled_widths
-        else:
-            # Compute scale factor for max_width.
-            scale_factor = max_width / float(sum(unscaled_widths))
-            scaled = [int(round(scale_factor * w)) for w in unscaled_widths]
-            # Once we've scaled the columns, we may be slightly over/under
-            # the amount we need so we have to adjust the columns.
-            off_by = sum(scaled) - max_width
-            while off_by != 0:
-                iter_order = range(len(scaled))
-                if off_by < 0:
-                    iter_order = reversed(iter_order)
-                for i in iter_order:
-                    if off_by > 0:
-                        scaled[i] -= 1
-                        off_by -= 1
-                    else:
-                        scaled[i] += 1
-                        off_by += 1
-                    if off_by == 0:
-                        break
-            return scaled
+        # Compute scale factor for max_width.
+        scale_factor = max_width / float(sum(unscaled_widths))
+        scaled = [int(round(scale_factor * w)) for w in unscaled_widths]
+        # Once we've scaled the columns, we may be slightly over/under
+        # the amount we need so we have to adjust the columns.
+        off_by = sum(scaled) - max_width
+        while off_by != 0:
+            iter_order = range(len(scaled))
+            if off_by < 0:
+                iter_order = reversed(iter_order)
+            for i in iter_order:
+                if off_by > 0:
+                    scaled[i] -= 1
+                    off_by -= 1
+                else:
+                    scaled[i] += 1
+                    off_by += 1
+                if off_by == 0:
+                    break
+        return scaled
 
     def total_width(self, padding=0, with_border=False, outer_padding=0):
-        total = 0
         # One char on each side == 2 chars total to the width.
         border_padding = 2
-        for w in self.calculate_column_widths():
-            total += w + padding
+        total = sum(w + padding for w in self.calculate_column_widths())
         if with_border:
             total += border_padding
         total += outer_padding + outer_padding

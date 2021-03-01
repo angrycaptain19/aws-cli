@@ -186,12 +186,11 @@ class WaiterStateDocBuilder(object):
         return u'when polling with ``%s``.' % operation_name
 
     def _build_polling_description(self, delay, max_attempts):
-        description = (
+        return (
             ' It will poll every %s seconds until a successful state '
             'has been reached. This will exit with a return code of 255 '
             'after %s failed checks.'
             % (delay, max_attempts))
-        return description
 
 
 class WaiterCaller(object):

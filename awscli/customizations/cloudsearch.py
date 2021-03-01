@@ -47,7 +47,7 @@ def index_hydrate(params, container, cli_type, key, value):
     # Find the type and transform it for the type options field name
     # E.g: int-array => IntArray
     _type = params['IndexField']['IndexFieldType']
-    _type = ''.join([i.capitalize() for i in _type.split('-')])
+    _type = ''.join(i.capitalize() for i in _type.split('-'))
 
     # ``index_field`` of type ``latlon`` is mapped to ``Latlon``.
     # However, it is defined as ``LatLon`` in the model so it needs to

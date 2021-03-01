@@ -122,8 +122,7 @@ def get_values_from_editor(args):
         p.communicate()
         with open(f.name) as f:
             filled_in_contents = f.read()
-            parsed_values = parse_filled_in_contents(filled_in_contents)
-            return parsed_values
+            return parse_filled_in_contents(filled_in_contents)
 
 
 def replace_issue_references(parsed, repo_name):

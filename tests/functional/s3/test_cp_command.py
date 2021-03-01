@@ -668,7 +668,6 @@ class TestCPCommand(BaseCPCommandTest):
         self.assertIn(progress_message, stdout)
 
     def test_cp_with_error_and_warning_permissions(self):
-        command = "s3 cp %s s3://bucket/foo.txt"
         self.parsed_responses = [{
             'Error': {
                 'Code': 'NoSuchBucket',
@@ -685,9 +684,10 @@ class TestCPCommand(BaseCPCommandTest):
         # on all OSes so it has to be patched.
         # TODO: find another method to test this behavior without patching.
         with mock.patch(
-                'awscli.customizations.s3.filegenerator.get_file_stat',
-                return_value=(None, None)
-        ):
+                    'awscli.customizations.s3.filegenerator.get_file_stat',
+                    return_value=(None, None)
+            ):
+            command = "s3 cp %s s3://bucket/foo.txt"
             _, stderr, rc = self.run_cmd(command % full_path, expected_rc=1)
         self.assertIn('upload failed', stderr)
         self.assertIn('warning: File has an invalid timestamp.', stderr)
@@ -695,13 +695,13 @@ class TestCPCommand(BaseCPCommandTest):
 
 class TestStreamingCPCommand(BaseAWSCommandParamsTest):
     def test_streaming_upload(self):
-        command = "s3 cp - s3://bucket/streaming.txt"
         self.parsed_responses = [{
             'ETag': '"c8afdb36c52cf4727836669019e69222"'
         }]
 
         binary_stdin = BufferedBytesIO(b'foo\n')
         with mock.patch('sys.stdin', binary_stdin):
+            command = "s3 cp - s3://bucket/streaming.txt"
             self.run_cmd(command)
 
         self.assertEqual(len(self.operations_called), 1)
@@ -716,13 +716,13 @@ class TestStreamingCPCommand(BaseAWSCommandParamsTest):
         self.assertEqual(args, expected_args)
 
     def test_streaming_upload_with_expected_size(self):
-        command = "s3 cp - s3://bucket/streaming.txt --expected-size 4"
         self.parsed_responses = [{
             'ETag': '"c8afdb36c52cf4727836669019e69222"'
         }]
 
         binary_stdin = BufferedBytesIO(b'foo\n')
         with mock.patch('sys.stdin', binary_stdin):
+            command = "s3 cp - s3://bucket/streaming.txt --expected-size 4"
             self.run_cmd(command)
 
         self.assertEqual(len(self.operations_called), 1)
@@ -737,7 +737,6 @@ class TestStreamingCPCommand(BaseAWSCommandParamsTest):
         self.assertEqual(args, expected_args)
 
     def test_streaming_upload_error(self):
-        command = "s3 cp - s3://bucket/streaming.txt"
         self.parsed_responses = [{
             'Error': {
                 'Code': 'NoSuchBucket',
@@ -749,6 +748,7 @@ class TestStreamingCPCommand(BaseAWSCommandParamsTest):
 
         binary_stdin = BufferedBytesIO(b'foo\n')
         with mock.patch('sys.stdin', binary_stdin):
+            command = "s3 cp - s3://bucket/streaming.txt"
             _, stderr, _ = self.run_cmd(command, expected_rc=1)
 
         error_message = (
@@ -758,12 +758,12 @@ class TestStreamingCPCommand(BaseAWSCommandParamsTest):
         self.assertIn(error_message, stderr)
 
     def test_streaming_upload_when_stdin_unavailable(self):
-        command = "s3 cp - s3://bucket/streaming.txt"
         self.parsed_responses = [{
             'ETag': '"c8afdb36c52cf4727836669019e69222"'
         }]
 
         with mock.patch('sys.stdin', None):
+            command = "s3 cp - s3://bucket/streaming.txt"
             _, stderr, _ = self.run_cmd(command, expected_rc=1)
 
         expected_message = (

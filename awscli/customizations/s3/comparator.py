@@ -113,13 +113,13 @@ class Comparator(object):
                     if should_sync:                        
                         yield dest_file
 
-            elif (not src_done) and dest_done:
+            elif not src_done:
                 src_take = True
                 should_sync = self._not_at_dest_sync_strategy.determine_should_sync(src_file, None)
                 if should_sync:
                     yield src_file
 
-            elif src_done and (not dest_done):
+            elif not dest_done:
                 dest_take = True
                 should_sync = self._not_at_src_sync_strategy.determine_should_sync(None, dest_file)
                 if should_sync:                        

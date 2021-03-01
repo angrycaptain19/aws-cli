@@ -67,17 +67,14 @@ class TestPresignCommand(BaseAWSCommandParamsTest):
         self.assertEqual(query_params, expected_match['query_params'])
 
     def parse_query_string(self, query_string):
-        pairs = []
-        for part in query_string.split('&'):
-            pairs.append(part.split('=', 1))
+        pairs = [part.split('=', 1) for part in query_string.split('&')]
         return dict(pairs)
 
     def get_presigned_url_for_cmd(self, cmdline):
         with mock.patch('time.time', FROZEN_TIME):
             with mock.patch('datetime.datetime') as d:
                 d.utcnow = FROZEN_DATETIME
-                stdout = self.assert_params_for_cmd(cmdline, None)[0].strip()
-                return stdout
+                return self.assert_params_for_cmd(cmdline, None)[0].strip()
 
     def test_generates_a_url(self):
         stdout = self.get_presigned_url_for_cmd(

@@ -30,8 +30,7 @@ def get_relative_expiration_time(remaining):
             break
         prev_non_zero_attr = value > 0
 
-    message = " ".join(values)
-    return message
+    return " ".join(values)
 
 
 class BaseLogin(object):
@@ -138,7 +137,7 @@ class NuGetBaseLogin(BaseLogin):
             source_configured_message = self._SOURCE_ADDED_MESSAGE
 
         if dry_run:
-            dry_run_command = ' '.join([str(cd) for cd in command])
+            dry_run_command = ' '.join(str(cd) for cd in command)
             uni_print(dry_run_command)
             uni_print('\n')
             return
@@ -166,11 +165,8 @@ class NuGetBaseLogin(BaseLogin):
         # ...
         #   100. Source Name 100
         #       https://source100.com/index.json
-
        # Or it can be (blank line after Registered Sources:)
-
        # Registered Sources:
-
        #   1.  Source Name 1 [Enabled]
        #       https://source1.com/index.json
        #   2.  Source Name 2 [Disabled]
@@ -187,12 +183,10 @@ class NuGetBaseLogin(BaseLogin):
         lines = response.decode("utf-8").splitlines()
         lines = [line for line in lines if line.strip() != '']
 
-        source_to_url_dict = {}
-        for i in range(1, len(lines), 2):
-            source_to_url_dict[self._parse_source_name(lines[i])] = \
-                self._parse_source_url(lines[i + 1])
-
-        return source_to_url_dict
+        return {
+            self._parse_source_name(lines[i]): self._parse_source_url(lines[i + 1])
+            for i in range(1, len(lines), 2)
+        }
 
     def _parse_source_name(self, line):
         # A source name line takes the following form:
@@ -312,11 +306,7 @@ class NpmLogin(BaseLogin):
             return namespace
 
         # Add @ prefix to scope if it doesn't exist
-        if namespace.startswith('@'):
-            scope = namespace
-        else:
-            scope = '@{}'.format(namespace)
-
+        scope = namespace if namespace.startswith('@') else '@{}'.format(namespace)
         if not valid_scope_name.match(scope):
             raise ValueError(
                 'Invalid scope name, scope must contain URL-safe '
@@ -619,10 +609,7 @@ class CodeArtifactLogin(BasicCommand):
         if parsed_args.duration_seconds:
             kwargs['durationSeconds'] = parsed_args.duration_seconds
 
-        get_authorization_token_response = \
-            codeartifact_client.get_authorization_token(**kwargs)
-
-        return get_authorization_token_response
+        return codeartifact_client.get_authorization_token(**kwargs)
 
     def _run_main(self, parsed_args, parsed_globals):
         tool = parsed_args.tool.lower()

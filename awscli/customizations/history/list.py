@@ -91,9 +91,8 @@ class TextFormatter(object):
 
     def _format_time(self, timestamp):
         command_time = datetime.datetime.fromtimestamp(timestamp / 1000)
-        formatted = datetime.datetime.strftime(
+        return datetime.datetime.strftime(
             command_time, '%Y-%m-%d %I:%M:%S %p')
-        return formatted
 
     def _format_args(self, args, arg_width):
         json_value = json.loads(args)
@@ -108,13 +107,12 @@ class TextFormatter(object):
             self._col_widths['timestamp'],
             self._col_widths['args']
         )
-        record_line = fmt_string.format(
+        return fmt_string.format(
             record['id_a'],
             self._format_time(record['timestamp']),
             self._format_args(record['args'], self._col_widths['args']),
             record['rc']
         )
-        return record_line
 
     def __call__(self, record_adapter):
         for record in record_adapter:

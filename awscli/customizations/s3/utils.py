@@ -166,10 +166,7 @@ class StablePriorityQueue(queue.Queue):
         self.default_priority = max_priority
 
     def _qsize(self):
-        size = 0
-        for bucket in self.priorities:
-            size += len(bucket)
-        return size
+        return sum(len(bucket) for bucket in self.priorities)
 
     def _put(self, item):
         priority = min(getattr(item, 'PRIORITY', self.default_priority),
@@ -260,12 +257,10 @@ def find_dest_path_comp_key(files, src_path=None):
     else:
         rel_path = src_path.split(sep_table[src_type])[-1]
     compare_key = rel_path.replace(sep_table[src_type], '/')
+    dest_path = dest['path']
     if files['use_src_name']:
-        dest_path = dest['path']
         dest_path += rel_path.replace(sep_table[src_type],
                                       sep_table[dest_type])
-    else:
-        dest_path = dest['path']
     return dest_path, compare_key
 
 
@@ -276,10 +271,9 @@ def create_warning(path, error_message, skip_file=True):
     print_string = "warning: "
     if skip_file:
         print_string = print_string + "Skipping file " + path + ". "
-    print_string = print_string + error_message
-    warning_message = WarningResult(message=print_string, error=False,
+    print_string += error_message
+    return WarningResult(message=print_string, error=False,
                                     warning=True)
-    return warning_message
 
 
 class StdoutBytesWriter(object):
@@ -733,7 +727,7 @@ class DirectoryCreatorSubscriber(BaseSubscriber):
             if not os.path.exists(d):
                 os.makedirs(d)
         except OSError as e:
-            if not e.errno == errno.EEXIST:
+            if e.errno != errno.EEXIST:
                 raise CreateDirectoryError(
                     "Could not create directory %s: %s" % (d, e))
 

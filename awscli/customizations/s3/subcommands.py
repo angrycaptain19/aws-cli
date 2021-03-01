@@ -586,10 +586,7 @@ class ListCommand(S3Command):
         """
         This function creates the size string when objects are being listed.
         """
-        if self._human_readable:
-            size_str = human_readable_size(size)
-        else:
-            size_str = str(size)
+        size_str = human_readable_size(size) if self._human_readable else str(size)
         return size_str.rjust(10, ' ')
 
     def _print_summary(self):
@@ -881,15 +878,17 @@ class CommandArchitecture(object):
             verify=self.parameters['verify_ssl'],
             config=client_config
         )
-        if self.parameters['source_region']:
-            if self.parameters['paths_type'] == 's3s3':
-                self._source_client = get_client(
-                    self.session,
-                    region=self.parameters['source_region'],
-                    endpoint_url=None,
-                    verify=self.parameters['verify_ssl'],
-                    config=client_config
-                )
+        if (
+            self.parameters['source_region']
+            and self.parameters['paths_type'] == 's3s3'
+        ):
+            self._source_client = get_client(
+                self.session,
+                region=self.parameters['source_region'],
+                endpoint_url=None,
+                verify=self.parameters['verify_ssl'],
+                config=client_config
+            )
 
     def create_instructions(self):
         """
@@ -1142,10 +1141,7 @@ class CommandParameters(object):
             self.parameters['source_region'] = None
         if self.cmd in ['sync', 'mb', 'rb']:
             self.parameters['dir_op'] = True
-        if self.cmd == 'mv':
-            self.parameters['is_move'] = True
-        else:
-            self.parameters['is_move'] = False
+        self.parameters['is_move'] = self.cmd == 'mv'
 
     def add_paths(self, paths):
         """
@@ -1200,7 +1196,7 @@ class CommandParameters(object):
                 os.makedirs(params['dest'])
 
     def _same_path(self, src, dest):
-        if not self.parameters['paths_type'] == 's3s3':
+        if self.parameters['paths_type'] != 's3s3':
             return False
         elif src == dest:
             return True
@@ -1229,14 +1225,13 @@ class CommandParameters(object):
                          'locals3': ['cp', 'sync', 'mv'],
                          's3': ['mb', 'rb', 'rm'],
                          'local': [], 'locallocal': []}
-        paths_type = ''
         usage = "usage: aws s3 %s %s" % (self.cmd,
                                          self.usage)
-        for i in range(len(paths)):
-            if paths[i].startswith('s3://'):
-                paths_type = paths_type + 's3'
-            else:
-                paths_type = paths_type + 'local'
+        paths_type = ''.join(
+            's3' if paths[i].startswith('s3://') else 'local'
+            for i in range(len(paths))
+        )
+
         if self.cmd in template_type[paths_type]:
             self.parameters['paths_type'] = paths_type
         else:
@@ -1270,23 +1265,27 @@ class CommandParameters(object):
         sse_c_key_type = sse_c_type + '_key'
         sse_c_type_param = '--' + sse_c_type.replace('_', '-')
         sse_c_key_type_param = '--' + sse_c_key_type.replace('_', '-')
-        if self.parameters.get(sse_c_type):
-            if not self.parameters.get(sse_c_key_type):
-                raise ValueError(
-                    'It %s is specified, %s must be specified '
-                    'as well.' % (sse_c_type_param, sse_c_key_type_param)
-                )
-        if self.parameters.get(sse_c_key_type):
-            if not self.parameters.get(sse_c_type):
-                raise ValueError(
-                    'It %s is specified, %s must be specified '
-                    'as well.' % (sse_c_key_type_param, sse_c_type_param)
-                )
+        if self.parameters.get(sse_c_type) and not self.parameters.get(
+            sse_c_key_type
+        ):
+            raise ValueError(
+                'It %s is specified, %s must be specified '
+                'as well.' % (sse_c_type_param, sse_c_key_type_param)
+            )
+        if self.parameters.get(sse_c_key_type) and not self.parameters.get(
+            sse_c_type
+        ):
+            raise ValueError(
+                'It %s is specified, %s must be specified '
+                'as well.' % (sse_c_key_type_param, sse_c_type_param)
+            )
 
     def _validate_sse_c_copy_source_for_paths(self):
-        if self.parameters.get('sse_c_copy_source'):
-            if self.parameters['paths_type'] != 's3s3':
-                raise ValueError(
-                    '--sse-c-copy-source is only supported for '
-                    'copy operations.'
-                )
+        if (
+            self.parameters.get('sse_c_copy_source')
+            and self.parameters['paths_type'] != 's3s3'
+        ):
+            raise ValueError(
+                '--sse-c-copy-source is only supported for '
+                'copy operations.'
+            )

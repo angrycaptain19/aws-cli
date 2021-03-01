@@ -158,10 +158,7 @@ class TextTranslator(nodes.NodeVisitor):
         self.new_state(0)
 
     def depart_title(self, node):
-        if isinstance(node.parent, nodes.section):
-            char = self._title_char
-        else:
-            char = '^'
+        char = self._title_char if isinstance(node.parent, nodes.section) else '^'
         text = ''.join(x[1] for x in self.states.pop() if x[0] == -1)
         self.stateindent.pop()
         self.states[-1].append((0, ['', text, '%s' % (char * len(text)), '']))
@@ -271,9 +268,7 @@ class TextTranslator(nodes.NodeVisitor):
 
     def visit_productionlist(self, node):
         self.new_state()
-        names = []
-        for production in node:
-            names.append(production['tokenname'])
+        names = [production['tokenname'] for production in node]
         maxlen = max(len(name) for name in names)
         for production in node:
             if production['tokenname']:
@@ -510,9 +505,7 @@ class TextTranslator(nodes.NodeVisitor):
     def depart_list_item(self, node):
         if self.list_counter[-1] == -1:
             self.end_state(first='* ', end=None)
-        elif self.list_counter[-1] == -2:
-            pass
-        else:
+        elif self.list_counter[-1] != -2:
             self.end_state(first='%s. ' % self.list_counter[-1], end=None)
 
     def visit_definition_list_item(self, node):

@@ -20,10 +20,7 @@ LOG = logging.getLogger(__name__)
 class Completer(object):
 
     def __init__(self, driver=None):
-        if driver is not None:
-            self.driver = driver
-        else:
-            self.driver = awscli.clidriver.create_clidriver()
+        self.driver = awscli.clidriver.create_clidriver() if driver is None else driver
         self.main_help = self.driver.create_help_command()
         self.main_options = self._get_documented_completions(
             self.main_help.arg_table)

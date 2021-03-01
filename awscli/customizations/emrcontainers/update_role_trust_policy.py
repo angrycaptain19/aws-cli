@@ -170,22 +170,21 @@ class UpdateRoleTrustPolicyCommand(BasicCommand):
         matches = check_if_statement_exists(trust_policy_statement,
                                             assume_role_document)
 
-        if not matches:
-            LOG.debug('Role %s does not have the required trust policy ',
-                      self._role_name)
-
-            existing_statements = assume_role_document.get("Statement")
-            if existing_statements is None:
-                assume_role_document["Statement"] = [trust_policy_statement]
-            else:
-                existing_statements.append(trust_policy_statement)
-
-            if self._dry_run:
-                return json.dumps(assume_role_document, indent=2)
-            else:
-                LOG.debug('Updating trust policy of role %s', self._role_name)
-                iam_client.update_assume_role_policy(self._role_name,
-                                                     assume_role_document)
-                return TRUST_POLICY_UPDATE_SUCCESSFUL % self._role_name
-        else:
+        if matches:
             return TRUST_POLICY_STATEMENT_ALREADY_EXISTS % self._role_name
+
+        LOG.debug('Role %s does not have the required trust policy ',
+                  self._role_name)
+
+        existing_statements = assume_role_document.get("Statement")
+        if existing_statements is None:
+            assume_role_document["Statement"] = [trust_policy_statement]
+        else:
+            existing_statements.append(trust_policy_statement)
+
+        if self._dry_run:
+            return json.dumps(assume_role_document, indent=2)
+        LOG.debug('Updating trust policy of role %s', self._role_name)
+        iam_client.update_assume_role_policy(self._role_name,
+                                             assume_role_document)
+        return TRUST_POLICY_UPDATE_SUCCESSFUL % self._role_name

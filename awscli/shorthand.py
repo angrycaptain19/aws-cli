@@ -89,11 +89,10 @@ class ShorthandParseSyntaxError(ShorthandParseError):
         super(ShorthandParseSyntaxError, self).__init__(msg)
 
     def _construct_msg(self):
-        msg = (
+        return (
             "Expected: '%s', received: '%s' for input:\n"
             "%s"
         ) % (self.expected, self.actual, self._error_location())
-        return msg
 
 
 class DuplicateKeyInObjectError(ShorthandParseError):
@@ -105,12 +104,11 @@ class DuplicateKeyInObjectError(ShorthandParseError):
         super(DuplicateKeyInObjectError, self).__init__(msg)
 
     def _construct_msg(self):
-        msg = (
+        return (
             "Second instance of key \"%s\" encountered for input:\n%s\n"
             "This is often because there is a preceeding \",\" instead of a "
             "space."
         ) % (self.key, self._error_location())
-        return msg
 
 
 class ShorthandParser(object):

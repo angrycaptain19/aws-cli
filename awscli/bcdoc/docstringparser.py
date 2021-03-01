@@ -69,21 +69,14 @@ class HTMLTree(object):
             return
 
         if is_start:
-            if tag == 'li':
-                node = LineItemNode(attrs)
-            else:
-                node = TagNode(tag, attrs)
+            node = LineItemNode(attrs) if tag == 'li' else TagNode(tag, attrs)
             self.current_node.add_child(node)
             self.current_node = node
         else:
             self.current_node = self.current_node.parent
 
     def _doc_has_handler(self, tag, is_start):
-        if is_start:
-            handler_name = 'start_%s' % tag
-        else:
-            handler_name = 'end_%s' % tag
-
+        handler_name = 'start_%s' % tag if is_start else 'end_%s' % tag
         return hasattr(self.doc.style, handler_name)
 
     def add_data(self, data):

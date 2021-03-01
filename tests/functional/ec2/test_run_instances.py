@@ -47,9 +47,9 @@ class TestRunInstances(BaseAWSCommandParamsTest):
         self.assert_run_instances_call(args, result)
 
     def test_user_data(self):
-        data = u'\u0039'
         with temporary_file('r+') as tmp:
             with compat_open(tmp.name, 'w') as f:
+                data = u'\u0039'
                 f.write(data)
                 f.flush()
                 args = ' --image-id foo --user-data file://%s' % f.name

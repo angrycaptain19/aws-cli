@@ -187,7 +187,7 @@ class TestAssumeRoleCredentials(unittest.TestCase):
             'source_profile = middle\n'
             'role_arn = %s\n'
         )
-        config = config % (
+        config %= (
             user_creds['AccessKeyId'], user_creds['SecretAccessKey'],
             middle_role['Arn'], final_role['Arn']
         )
@@ -228,7 +228,7 @@ class TestAssumeRoleCredentials(unittest.TestCase):
             'role_arn = %s\n'
             'credential_source = Environment\n'
         )
-        config = config % role['Arn']
+        config %= role['Arn']
         with open(self.config_file, 'w') as f:
             f.write(config)
 

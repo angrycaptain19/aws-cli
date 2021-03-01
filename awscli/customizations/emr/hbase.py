@@ -98,7 +98,7 @@ class ScheduleHBaseBackup(Command):
 
     def _check_type(self, type):
         type = type.lower()
-        if type != constants.FULL and type != constants.INCREMENTAL:
+        if type not in [constants.FULL, constants.INCREMENTAL]:
             raise ValueError('aws: error: invalid type. '
                              'type should be either ' +
                              constants.FULL + ' or ' + constants.INCREMENTAL +
@@ -106,9 +106,7 @@ class ScheduleHBaseBackup(Command):
 
     def _check_unit(self, unit):
         unit = unit.lower()
-        if (unit != constants.MINUTES and
-                unit != constants.HOURS and
-                unit != constants.DAYS):
+        if unit not in [constants.MINUTES, constants.HOURS, constants.DAYS]:
             raise ValueError('aws: error: invalid unit. unit should be one of'
                              ' the following values: ' + constants.MINUTES +
                              ', ' + constants.HOURS + ' or ' + constants.DAYS +

@@ -179,12 +179,11 @@ class OpsWorksRegister(BasicCommand):
             raise ValueError(
                 "--use-instance-profile is only supported for EC2.")
 
-        if args.hostname:
-            if not HOSTNAME_RE.match(args.hostname):
-                raise ValueError(
-                    "Invalid hostname: '%s'. Hostnames must consist of "
-                    "letters, digits and dashes only and must not start or "
-                    "end with a dash." % args.hostname)
+        if args.hostname and not HOSTNAME_RE.match(args.hostname):
+            raise ValueError(
+                "Invalid hostname: '%s'. Hostnames must consist of "
+                "letters, digits and dashes only and must not start or "
+                "end with a dash." % args.hostname)
 
     def retrieve_stack(self, args):
         """

@@ -57,8 +57,7 @@ class Socks(Command):
                            '8157']
 
             print(' '.join(command))
-            rc = subprocess.call(command)
-            return rc
+            return subprocess.call(command)
         except KeyboardInterrupt:
             print('Disabling Socks Tunnel.')
             return 0
@@ -144,8 +143,7 @@ class Put(Command):
         else:
             command[-1] = command[-1] + ":" + parsed_args.src.split('/')[-1]
         print(' '.join(command))
-        rc = subprocess.call(command)
-        return rc
+        return subprocess.call(command)
 
 
 class Get(Command):
@@ -183,5 +181,4 @@ class Get(Command):
         else:
             command.append(parsed_args.src.split('/')[-1])
         print(' '.join(command))
-        rc = subprocess.call(command)
-        return rc
+        return subprocess.call(command)

@@ -17,9 +17,8 @@ class FileRenderer(PagingHelpRenderer):
         self._file_path = file_path
 
     def render(self, contents):
-        fp = open(self._file_path, 'wb')
-        fp.write(contents)
-        fp.close()
+        with open(self._file_path, 'wb') as fp:
+            fp.write(contents)
 
 
 def do_operation(driver, service_path, operation_name, operation_command):
@@ -102,27 +101,26 @@ def do_provider(driver):
 
 def build_service_list(tut_path, ref_path, driver):
     file_path = os.path.join(tut_path, 'services.rst')
-    fp = open(file_path, 'w')
-    fp.write('\n')
-    l = []
-    help_command = driver.create_help_command()
-    for service_name in help_command.command_table:
-        if service_name == 'help':
-            continue
-        service_command = help_command.command_table[service_name]
-        if not hasattr(service_command, '_service_object'):
-            continue
-        service = service_command._service_object
-        l.append((service.service_full_name, service_name))
-    l = sorted(l, key=lambda x: x[1])
-    for full_name, service_name in l:
-        service_ref_path = os.path.join(ref_path, service_name)
-        service_ref_path = os.path.join(service_ref_path, 'index')
-        fp.write('* :doc:`%s <..%s%s>`\n' % (full_name,
-                                             os.path.sep,
-                                             service_ref_path))
-    fp.write('\n')
-    fp.close()
+    with open(file_path, 'w') as fp:
+        fp.write('\n')
+        l = []
+        help_command = driver.create_help_command()
+        for service_name in help_command.command_table:
+            if service_name == 'help':
+                continue
+            service_command = help_command.command_table[service_name]
+            if not hasattr(service_command, '_service_object'):
+                continue
+            service = service_command._service_object
+            l.append((service.service_full_name, service_name))
+        l = sorted(l, key=lambda x: x[1])
+        for full_name, service_name in l:
+            service_ref_path = os.path.join(ref_path, service_name)
+            service_ref_path = os.path.join(service_ref_path, 'index')
+            fp.write('* :doc:`%s <..%s%s>`\n' % (full_name,
+                                                 os.path.sep,
+                                                 service_ref_path))
+        fp.write('\n')
 
 
 if __name__ == '__main__':

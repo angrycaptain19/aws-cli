@@ -296,24 +296,26 @@ class BaseTransferRequestSubmitter(object):
         )
 
     def _warn_glacier(self, fileinfo):
-        if not self._cli_params.get('force_glacier_transfer'):
-            if not fileinfo.is_glacier_compatible():
-                LOGGER.debug(
-                    'Encountered glacier object s3://%s. Not performing '
-                    '%s on object.' % (fileinfo.src, fileinfo.operation_name))
-                if not self._cli_params.get('ignore_glacier_warnings'):
-                    warning = create_warning(
-                        's3://'+fileinfo.src,
-                        'Object is of storage class GLACIER. Unable to '
-                        'perform %s operations on GLACIER objects. You must '
-                        'restore the object to be able to perform the '
-                        'operation. See aws s3 %s help for additional '
-                        'parameter options to ignore or force these '
-                        'transfers.' %
-                        (fileinfo.operation_name, fileinfo.operation_name)
-                    )
-                    self._result_queue.put(warning)
-                return True
+        if (
+            not self._cli_params.get('force_glacier_transfer')
+            and not fileinfo.is_glacier_compatible()
+        ):
+            LOGGER.debug(
+                'Encountered glacier object s3://%s. Not performing '
+                '%s on object.' % (fileinfo.src, fileinfo.operation_name))
+            if not self._cli_params.get('ignore_glacier_warnings'):
+                warning = create_warning(
+                    's3://'+fileinfo.src,
+                    'Object is of storage class GLACIER. Unable to '
+                    'perform %s operations on GLACIER objects. You must '
+                    'restore the object to be able to perform the '
+                    'operation. See aws s3 %s help for additional '
+                    'parameter options to ignore or force these '
+                    'transfers.' %
+                    (fileinfo.operation_name, fileinfo.operation_name)
+                )
+                self._result_queue.put(warning)
+            return True
         return False
 
     def _warn_parent_reference(self, fileinfo):

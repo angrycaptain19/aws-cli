@@ -66,11 +66,9 @@ def build_emrfs_confiuration(emrfs_args):
         emrfs_properties[constants.EMRFS_CSE_CUSTOM_PROVIDER_URI_KEY] = \
             emrfs_args.get('CustomProviderLocation')
 
-    emrfs_configuration = {
+    return {
         'Classification': constants.EMRFS_SITE,
         'Properties': emrfs_properties}
-
-    return emrfs_configuration
 
 
 def _verify_emrfs_args(emrfs_args):

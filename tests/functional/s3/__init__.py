@@ -41,16 +41,11 @@ class BaseS3TransferCommandTest(BaseAWSCommandParamsTest):
         return response
 
     def list_objects_response(self, keys):
-        contents = []
-        for key in keys:
-            contents.append(
-                {
+        contents = [{
                     'Key': key,
                     'LastModified': '00:00:00Z',
                     'Size': 100
-                }
-            )
-
+                } for key in keys]
         return {
             'Contents': contents,
             'CommonPrefixes': []
@@ -166,13 +161,9 @@ class BaseS3TransferCommandTest(BaseAWSCommandParamsTest):
 
     def complete_mpu_request(self, bucket, key, upload_id, num_parts,
                              **override_kwargs):
-        parts = []
-        for i in range(num_parts):
-            parts.append(
-                {
+        parts = [{
                     'ETag': '"etag"', 'PartNumber': i + 1
-                }
-            )
+                } for i in range(num_parts)]
         params = {
             'Bucket': bucket,
             'Key': key,

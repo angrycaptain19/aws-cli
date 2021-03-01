@@ -203,10 +203,7 @@ class TestServiceAliasCommand(unittest.TestCase):
         self.session = mock.Mock(spec=Session)
 
     def create_command_table(self, services):
-        command_table = {}
-        for service in services:
-            command_table[service] = mock.Mock(spec=CLICommand)
-        return command_table
+        return {service: mock.Mock(spec=CLICommand) for service in services}
 
     def create_parser(self, command_table, extra_params=None):
         parser = MainArgParser(

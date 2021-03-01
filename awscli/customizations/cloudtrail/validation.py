@@ -232,7 +232,7 @@ class PublicKeyProvider(object):
             StartTime=start_date, EndTime=end_date)
         public_keys_in_range = public_keys['PublicKeyList']
         LOG.debug('Loaded public keys in range: %s', public_keys_in_range)
-        return dict((key['Fingerprint'], key) for key in public_keys_in_range)
+        return {key['Fingerprint']: key for key in public_keys_in_range}
 
 
 class DigestProvider(object):

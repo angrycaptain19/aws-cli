@@ -314,9 +314,7 @@ class SectionValuePrettyFormatter(object):
 
     def _strip_whitespace(self, xml_string):
         xml_dom = xml.dom.minidom.parseString(xml_string)
-        return ''.join(
-            [line.strip() for line in xml_dom.toxml().splitlines()]
-        )
+        return ''.join(line.strip() for line in xml_dom.toxml().splitlines())
 
     def _is_json_structure(self, body):
         if body.startswith('{'):

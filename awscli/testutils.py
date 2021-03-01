@@ -409,11 +409,7 @@ class BaseAWSCommandParamsTest(unittest.TestCase):
         event_emitter.register('before-call', self.before_call)
         event_emitter.register_first(
             'before-parameter-build.*.*', self.before_parameter_build)
-        if not isinstance(cmd, list):
-            cmdlist = cmd.split()
-        else:
-            cmdlist = cmd
-
+        cmdlist = cmd.split() if not isinstance(cmd, list) else cmd
         with capture_output() as captured:
             try:
                 rc = self.driver.main(cmdlist)
@@ -478,10 +474,7 @@ class BaseCLIWireResponseTest(unittest.TestCase):
         self.send_is_patched = True
 
     def run_cmd(self, cmd, expected_rc=0):
-        if not isinstance(cmd, list):
-            cmdlist = cmd.split()
-        else:
-            cmdlist = cmd
+        cmdlist = cmd.split() if not isinstance(cmd, list) else cmd
         with capture_output() as captured:
             try:
                 rc = self.driver.main(cmdlist)
@@ -694,7 +687,7 @@ def _get_memory_with_ps(pid):
     command_list.append(str(pid))
     p = Popen(command_list, stdout=PIPE)
     stdout = p.communicate()[0]
-    if not p.returncode == 0:
+    if p.returncode != 0:
         raise ProcessTerminatedError(str(pid))
     else:
         # Get the RSS from output that looks like this:
@@ -743,8 +736,7 @@ class BaseS3CLICommand(unittest.TestCase):
 
     def create_client_for_bucket(self, bucket_name):
         region = self.regions.get(bucket_name, self.region)
-        client = self.session.create_client('s3', region_name=region)
-        return client
+        return self.session.create_client('s3', region_name=region)
 
     def assert_key_contents_equal(self, bucket, key, expected_contents):
         self.wait_until_key_exists(bucket, key)
@@ -781,10 +773,8 @@ class BaseS3CLICommand(unittest.TestCase):
         self.addCleanup(self.delete_key, bucket_name, key_name)
         extra_head_params = {}
         if extra_args:
-            extra_head_params = dict(
-                (k, v) for (k, v) in extra_args.items()
-                if k in self._PUT_HEAD_SHARED_EXTRAS
-            )
+            extra_head_params = {k: v for (k, v) in extra_args.items()
+                        if k in self._PUT_HEAD_SHARED_EXTRAS}
         self.wait_until_key_exists(
             bucket_name,
             key_name,
@@ -880,8 +870,7 @@ class BaseS3CLICommand(unittest.TestCase):
 
     def head_object(self, bucket_name, key_name):
         client = self.create_client_for_bucket(bucket_name)
-        response = client.head_object(Bucket=bucket_name, Key=key_name)
-        return response
+        return client.head_object(Bucket=bucket_name, Key=key_name)
 
     def wait_until_key_exists(self, bucket_name, key_name, extra_params=None,
                               min_successes=3):
